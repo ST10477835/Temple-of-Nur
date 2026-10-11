@@ -4,6 +4,14 @@
  */
 package temple.of.nur;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 /**
  *
  * @author Abulele
@@ -15,6 +23,7 @@ public class TempleOfNur {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        new GameFrame();
     }
-    
+
 }
