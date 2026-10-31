@@ -8,7 +8,7 @@ package temple.of.nur;
  *
  * @author Abulele
  */
-public class Entity {
+public abstract class Entity {
 
     public String Name;
     public int Level = 0;
@@ -34,6 +34,7 @@ public class Entity {
         this.width = width;
         this.height = height;
     }
+    abstract public void DisplayEntityInformation();
 }
 
 class Player extends Entity {
@@ -47,7 +48,8 @@ class Player extends Entity {
         this.Password = Password;
         this.Denomination = Denomination;
     }
-    public void DisplayPlayerInformation(){
+    @Override
+    public void DisplayEntityInformation(){
         System.out.printf("=".repeat(30)+"\nName: "+this.Name
                 +"\n"+"=".repeat(30)
                 +"\nLevel: "+this.Level
@@ -71,4 +73,27 @@ enum Denomination {
     Gish,
     Knight,
     Barbarian
+}
+
+class Enemy extends Entity{
+    
+    public Enemy(String Name) {
+        super(Name, 100, 100, 50, 50);
+    }
+    @Override
+    public void DisplayEntityInformation(){
+        System.out.printf("=".repeat(30)+"\nName: "+this.Name
+                +"\n"+"=".repeat(30)
+                +"\nLevel: "+this.Level
+                +"\n"+"=".repeat(30)
+                +"\nStatistics: \n"+"=".repeat(30)
+                +"\n"+this.Vitality.Name+": " +this.Vitality.Amount
+                +"\n"+this.Arcana.Name+": " +this.Arcana.Amount
+                +"\n"+this.Attack.Name+": " +this.Attack.Amount
+                +"\n"+this.Intelligence.Name+": " +this.Intelligence.Amount
+                +"\n"+this.Defense.Name+": " +this.Defense.Amount
+                +"\n"+this.Luck.Name+": " +this.Luck.Amount
+                +"\n"+"=".repeat(30)+"\n"
+                );
+    }
 }
