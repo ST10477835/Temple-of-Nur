@@ -4,6 +4,7 @@
  */
 package temple.of.nur;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -14,12 +15,48 @@ import javax.swing.JPanel;
  * @author Abulele
  */
 class GamePanel extends JPanel implements KeyListener {
-    
+
+    public boolean UpPressed;
+    public boolean DownPressed;
+    public boolean LeftPressed;
+    public boolean RightPressed;
+
     Player player = new Player("True Adam", "password123", Denomination.Mage);
-    Enemy enemy = new Enemy("Mob-Kun");
+
+    Enemy[] enemies = { //new Enemy("Mob-Kun")
+    };
+    int Scale = 80;//50x50 pixels
+    int[][] Map = {
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+    };
+
     public GamePanel() {
         new Thread(() -> {
             player.DisplayEntityInformation();
+            player.x = 350;
+            player.y = 250;
             GameLoop();
         }).start();
         addKeyListener(this);
@@ -27,54 +64,16 @@ class GamePanel extends JPanel implements KeyListener {
         setVisible(true);
         this.setSize(800, 600);
         //System.out.println("Panel Width: " + this.getWidth()
-                //+"\nPanel Height: " + this.getHeight());
+        //+"\nPanel Height: " + this.getHeight());
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        g.drawRect(player.x, player.y, player.width, player.height);
-        g.drawRect(enemy.x, enemy.y, enemy.width, enemy.height);
-        g.dispose();
-    }
-
-    public boolean IsColliding(int thisX, int thisY, int thatX, int thatY) {
-        return thisX < thatX + 50 && thisX + 50 > thatX && thisY < thatY + 50 && thisY + 50 > thatY;
-    }
     public void GameLoop() {
         while (true) {
-            //handle player movement
-            if (UpPressed) {
-            int nextY = player.y - player.speed;
-            int Y = (nextY) / 50;
-            int StartX = (player.x) / 50;
-            int EndX = (player.x+50)/50;
-            if(!IsColliding(player.x, nextY, enemy.x, enemy.y)) player.y -= player.speed;
-        }
-        if (DownPressed) {
-            int nextY = player.y + player.speed;
-            int Y = (nextY + 50)/ 50;
-            int StartX = player.x / 50;
-            int EndX = (player.x+50)/50;
-            if(!IsColliding(player.x, nextY, enemy.x, enemy.y)) player.y += player.speed;
-        }
-        if (LeftPressed) {
-            int nextX = player.x - player.speed;
-            int X = (nextX) /50;
-            int StartY = player.y / 50;
-            int EndY = (player.y+50)/50;
-            if(!IsColliding(nextX, player.y, enemy.x, enemy.y)) player.x -= player.speed;
-        }
-        if (RightPressed) {
-            int nextX = player.x + player.speed;
-            int X = (nextX +50) /50;
-            int StartY = (player.y) / 50;
-            int EndY = (player.y+50)/50;
-            if(!IsColliding(nextX, player.y, enemy.x, enemy.y)) player.x += player.speed;
-        }
-            this.repaint();
+            //movment
+            HandlePlayerMovment();
+            UpdateCamera();
             //render
-            //Sleep
+            this.repaint();
             try {
                 Thread.sleep(16);
             } catch (Exception e) {
@@ -83,30 +82,166 @@ class GamePanel extends JPanel implements KeyListener {
             }
         }
     }
-    public boolean UpPressed;
-    public boolean DownPressed;
-    public boolean LeftPressed;
-    public boolean RightPressed;
+
+    //movement
+    public boolean IsColliding(int thisX, int thisY, int thatX, int thatY) {
+        return thisX < thatX + Scale && thisX + Scale > thatX && thisY < thatY + Scale && thisY + Scale > thatY;
+    }
+
+    public void HandlePlayerMovment() {
+        if (UpPressed) {
+            int nextY = player.y - player.speed;
+            int Y = (nextY) / Scale;
+            int StartX = (player.x) / Scale;
+            int EndX = (player.x + Scale) / Scale;
+
+            if (enemies.length > 0) {
+                for (Enemy enemy : enemies) {
+                    if (!IsColliding(player.x, nextY, enemy.x, enemy.y)) {
+                        player.y -= player.speed;
+                    }
+                }
+            } else if (Map[Y][StartX] == 0 && Map[Y][EndX] == 0) {
+                player.y -= player.speed;
+            }
+        }
+        if (DownPressed) {
+            int nextY = player.y + player.speed;
+            int Y = (nextY + Scale) / Scale;
+            int StartX = player.x / Scale;
+            int EndX = (player.x + Scale) / Scale;
+            if (enemies.length > 0) {
+                for (Enemy enemy : enemies) {
+                    if (!IsColliding(player.x, nextY, enemy.x, enemy.y)) {
+                        player.y += player.speed;
+                    }
+                }
+            } else if (Map[Y][StartX] == 0 && Map[Y][EndX] == 0) {
+                player.y += player.speed;
+            }
+        }
+        if (LeftPressed) {
+            int nextX = player.x - player.speed;
+            int X = (nextX) / Scale;
+            int StartY = player.y / Scale;
+            int EndY = (player.y + Scale) / Scale;
+            if (enemies.length > 0) {
+                for (Enemy enemy : enemies) {
+                    if (!IsColliding(nextX, player.y, enemy.x, enemy.y)) {
+                        player.x -= player.speed;
+                    }
+                }
+            } else if (Map[StartY][X] == 0 && Map[EndY][X] == 0) {
+                player.x -= player.speed;
+            }
+        }
+        if (RightPressed) {
+            int nextX = player.x + player.speed;
+            int X = (nextX + Scale) / Scale;
+            int StartY = (player.y) / Scale;
+            int EndY = (player.y + Scale) / Scale;
+            if (enemies.length > 0) {
+                for (Enemy enemy : enemies) {
+                    if (!IsColliding(nextX, player.y, enemy.x, enemy.y)) {
+                        player.x += player.speed;
+                    }
+                }
+            } else if (Map[StartY][X] == 0 && Map[EndY][X] == 0) {
+                player.x += player.speed;
+            }
+        }
+    }
+    //rendering
+    //entity scale are the only things that are subject to variable change
+    //everything else will follow Scale
+    int CameraOffSetX = 0;
+    int CameraOffSetY = 0;
+
+    public void UpdateCamera() {
+        int mapWidthPx = Map[0].length * Scale; // columns = x
+        int mapHeightPx = Map.length * Scale;    // rows = y
+
+        int viewWidth = this.getWidth();
+        int viewHeight = this.getHeight();
+
+        // Where the camera WANTS to be so the player is centered
+        int targetX = player.x - viewWidth / 2;
+        int targetY = player.y - viewHeight / 2;
+
+        // Clamp so we never show past the map edges
+        targetX = Math.max(0, Math.min(targetX, mapWidthPx - viewWidth));
+        targetY = Math.max(0, Math.min(targetY, mapHeightPx - viewHeight));
+
+        // Smoothly ease toward the target instead of snapping
+        double smoothing = 0.5; // 0 = never moves, 1 = instant snap; tune to taste
+        CameraOffSetX += (targetX - CameraOffSetX) * smoothing;
+        CameraOffSetY += (targetY - CameraOffSetY) * smoothing;
+
+    }
+
+    public void DrawPlayer(Graphics g) {
+        g.drawRect(player.x - CameraOffSetX, player.y - CameraOffSetY, player.width, player.height);
+    }
+
+    public void DrawEnemy(Enemy enemy, Graphics g) {
+        g.drawRect(enemy.x, enemy.y, enemy.width, enemy.height);
+    }
+
+    public void DrawMap(Graphics g) {
+        for (int row = 0; row < Map.length; row++) {
+            for (int column = 0; column < Map[row].length; column++) {
+                int WorldX = column * Scale - CameraOffSetX;
+                int WorldY = row * Scale - CameraOffSetY;
+                
+                g.setColor(Map[row][column] == 1 ? Color.GRAY : Color.LIGHT_GRAY);
+                g.fillRect(WorldX, WorldY, Scale, Scale);
+            }
+        }
+    }
 
     @Override
-    public void keyTyped(KeyEvent e) {}
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        DrawMap(g);
+        DrawPlayer(g);
+        if (enemies.length > 0) {
+            for (Enemy enemy : enemies) {
+                DrawEnemy(enemy, g);
+            }
+        }
+        g.dispose();
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_W,KeyEvent.VK_UP -> UpPressed = true;
-            case KeyEvent.VK_A,KeyEvent.VK_LEFT -> LeftPressed = true;
-            case KeyEvent.VK_S,KeyEvent.VK_DOWN -> DownPressed = true;
-            case KeyEvent.VK_D,KeyEvent.VK_RIGHT -> RightPressed = true;
+            case KeyEvent.VK_W, KeyEvent.VK_UP ->
+                UpPressed = true;
+            case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
+                LeftPressed = true;
+            case KeyEvent.VK_S, KeyEvent.VK_DOWN ->
+                DownPressed = true;
+            case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
+                RightPressed = true;
         }
     }
+
     @Override
     public void keyReleased(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_W,KeyEvent.VK_UP -> UpPressed = false;
-            case KeyEvent.VK_A,KeyEvent.VK_LEFT -> LeftPressed = false;
-            case KeyEvent.VK_S,KeyEvent.VK_DOWN -> DownPressed = false;
-            case KeyEvent.VK_D,KeyEvent.VK_RIGHT -> RightPressed = false;
+            case KeyEvent.VK_W, KeyEvent.VK_UP ->
+                UpPressed = false;
+            case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
+                LeftPressed = false;
+            case KeyEvent.VK_S, KeyEvent.VK_DOWN ->
+                DownPressed = false;
+            case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
+                RightPressed = false;
         }
     }
-    
+
 }

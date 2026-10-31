@@ -13,8 +13,8 @@ public abstract class Entity {
     public String Name;
     public int Level = 0;
     public int Balance = 0;//# of coins
-    public int x;
-    public int y;
+    public int x = 55;
+    public int y = 55;
     public int width;
     public int height;
     public int speed = 3;
