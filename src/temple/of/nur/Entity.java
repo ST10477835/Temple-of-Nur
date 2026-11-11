@@ -17,7 +17,7 @@ public abstract class Entity {
     public int y = 55;
     public int width;
     public int height;
-    public int speed = 3;
+    public int speed = 5;
     public Statistic Vitality = new Statistic("Vitality", 8);
     public Statistic Arcana = new Statistic("Arcana", 8);
     public Statistic Attack = new Statistic("Attack", 8);

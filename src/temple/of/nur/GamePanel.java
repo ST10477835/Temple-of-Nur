@@ -23,9 +23,9 @@ class GamePanel extends JPanel implements KeyListener {
 
     Player player = new Player("True Adam", "password123", Denomination.Mage);
 
-    Enemy[] enemies = { //new Enemy("Mob-Kun")
+    Enemy[] enemies = {new Enemy("Mob-Kun")
     };
-    int Scale = 80;//50x50 pixels
+    int Scale = 50;//50x50 pixels
     int[][] Map = {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
         {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -91,13 +91,16 @@ class GamePanel extends JPanel implements KeyListener {
     public void HandlePlayerMovment() {
         if (UpPressed) {
             int nextY = player.y - player.speed;
-            int Y = (nextY) / Scale;
-            int StartX = (player.x) / Scale;
-            int EndX = (player.x + Scale) / Scale;
-
+            int Y = (int) (nextY) / Scale;
+            //how wide the player is
+            int StartX = (player.x - 1) / Scale;
+            int EndX = ((player.x - 1) + Scale) / Scale;
+            StartX = (player.x - (Map[Y][StartX]==1?0:1)) / Scale;
+            EndX = ((player.x - (Map[Y][StartX]==1?0:1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
-                    if (!IsColliding(player.x, nextY, enemy.x, enemy.y)) {
+                    if (!IsColliding(player.x, nextY, enemy.x, enemy.y)
+                            && (Map[Y][StartX] == 0 && Map[Y][EndX] == 0)) {
                         player.y -= player.speed;
                     }
                 }
@@ -106,13 +109,16 @@ class GamePanel extends JPanel implements KeyListener {
             }
         }
         if (DownPressed) {
-            int nextY = player.y + player.speed;
-            int Y = (nextY + Scale) / Scale;
-            int StartX = player.x / Scale;
-            int EndX = (player.x + Scale) / Scale;
+            int nextY = player.y + player.speed - 1;
+            int Y = (int) (nextY + Scale) / Scale;
+            int StartX = (player.x - 1) / Scale;
+            int EndX = ((player.x - 1) + Scale) / Scale;
+            StartX = (player.x - (Map[Y][StartX]==1?0:1)) / Scale;
+            EndX = ((player.x - (Map[Y][StartX]==1?0:1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
-                    if (!IsColliding(player.x, nextY, enemy.x, enemy.y)) {
+                    if (!IsColliding(player.x, nextY, enemy.x, enemy.y)
+                            && (Map[Y][StartX] == 0 && Map[Y][EndX] == 0)) {
                         player.y += player.speed;
                     }
                 }
@@ -121,13 +127,16 @@ class GamePanel extends JPanel implements KeyListener {
             }
         }
         if (LeftPressed) {
-            int nextX = player.x - player.speed;
-            int X = (nextX) / Scale;
-            int StartY = player.y / Scale;
-            int EndY = (player.y + Scale) / Scale;
+            int nextX = player.x - player.speed + 1;
+            int X = (int) (nextX) / Scale;
+            int StartY = (player.y - 1) / Scale;
+            int EndY = ((player.y - 1) + Scale) / Scale;
+            StartY = (player.y - (Map[StartY][X]==1?0:1)) / Scale;
+                EndY = ((player.y - (Map[EndY][X]==1?0:1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
-                    if (!IsColliding(nextX, player.y, enemy.x, enemy.y)) {
+                    if (!IsColliding(nextX, player.y, enemy.x, enemy.y)
+                            && (Map[StartY][X] == 0 && Map[EndY][X] == 0)) {
                         player.x -= player.speed;
                     }
                 }
@@ -136,13 +145,16 @@ class GamePanel extends JPanel implements KeyListener {
             }
         }
         if (RightPressed) {
-            int nextX = player.x + player.speed;
-            int X = (nextX + Scale) / Scale;
-            int StartY = (player.y) / Scale;
-            int EndY = (player.y + Scale) / Scale;
+            int nextX = player.x + player.speed - 1;
+            int X = (int) (nextX + Scale) / Scale;
+            int StartY = (player.y - 1) / Scale;
+            int EndY = ((player.y - 1) + Scale) / Scale;
+            StartY = (player.y - (Map[StartY][X]==1?0:1)) / Scale;
+                EndY = ((player.y - (Map[EndY][X]==1?0:1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
-                    if (!IsColliding(nextX, player.y, enemy.x, enemy.y)) {
+                    if (!IsColliding(nextX, player.y, enemy.x, enemy.y)
+                            && (Map[StartY][X] == 0 && Map[EndY][X] == 0)) {
                         player.x += player.speed;
                     }
                 }
@@ -184,7 +196,7 @@ class GamePanel extends JPanel implements KeyListener {
     }
 
     public void DrawEnemy(Enemy enemy, Graphics g) {
-        g.drawRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        g.drawRect(enemy.x - CameraOffSetX, enemy.y - CameraOffSetY, enemy.width, enemy.height);
     }
 
     public void DrawMap(Graphics g) {
@@ -192,7 +204,7 @@ class GamePanel extends JPanel implements KeyListener {
             for (int column = 0; column < Map[row].length; column++) {
                 int WorldX = column * Scale - CameraOffSetX;
                 int WorldY = row * Scale - CameraOffSetY;
-                
+
                 g.setColor(Map[row][column] == 1 ? Color.GRAY : Color.LIGHT_GRAY);
                 g.fillRect(WorldX, WorldY, Scale, Scale);
             }
@@ -227,6 +239,20 @@ class GamePanel extends JPanel implements KeyListener {
                 DownPressed = true;
             case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
                 RightPressed = true;
+            case KeyEvent.VK_V -> {
+                int nextX = player.x - player.speed + 1;
+                int X = (int) (nextX) / Scale;
+                int StartY = (player.y - 1) / Scale;
+                int EndY = ((player.y - 1) + Scale) / Scale;
+                StartY = (player.y - (Map[StartY][X]==1?0:1)) / Scale;
+                EndY = ((player.y - (Map[EndY][X]==1?0:1)) + Scale) / Scale;
+                System.out.println("Player coords: {" + player.x + "," + player.y + "}");
+                System.out.println("nextX: " + nextX);
+                System.out.println("X: " + X);
+                System.out.println("StartY: " + StartY);
+                System.out.println("EndY: " + EndY);
+
+            }
         }
     }
 

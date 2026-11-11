@@ -4,6 +4,7 @@
  */
 package temple.of.nur;
 
+import java.awt.Color;
 import java.awt.Insets;
 import javax.swing.JFrame;
 
@@ -25,6 +26,7 @@ class GameFrame extends JFrame {
         this.setSize(CalculatedWidth, CalclulatedHeight);
         System.out.println("Frame Width: " + this.getWidth());
         System.out.println("Frame Height: " + this.getHeight());
+        this.setBackground(Color.black);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
