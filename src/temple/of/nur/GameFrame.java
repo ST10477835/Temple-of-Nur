@@ -13,7 +13,10 @@ import javax.swing.JFrame;
  * @author Abulele
  */
 class GameFrame extends JFrame {
-    
+
+    public static int FrameWidth;
+    public static int FrameHeight;
+
     public GameFrame() {
         this.setResizable(true);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -24,11 +27,15 @@ class GameFrame extends JFrame {
         int CalculatedWidth = 800 + Insets.left + Insets.right;
         int CalclulatedHeight = 600 + Insets.bottom + Insets.top;
         this.setSize(CalculatedWidth, CalclulatedHeight);
-        System.out.println("Frame Width: " + this.getWidth());
-        System.out.println("Frame Height: " + this.getHeight());
+        
+        FrameWidth = this.getWidth();
+        FrameHeight = this.getHeight();
+        
+        System.out.println("Frame Width: " + FrameWidth);
+        System.out.println("Frame Height: " + FrameHeight);
         this.setBackground(Color.black);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
-    
+
 }
