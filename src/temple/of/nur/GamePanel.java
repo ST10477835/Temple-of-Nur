@@ -28,11 +28,13 @@ class GamePanel extends JPanel implements KeyListener {
     public boolean RightPressed;
 
     public volatile static boolean GamePaused = false;
+    public volatile static boolean EnemyEncountered = false;
+    public static Enemy TargetEnemy;
 
     Player player = new Player("True Adam", "password123", Denomination.Mage);
-    Enemy[] enemies = {new Enemy("Mob-Kun")
+    public static Enemy[] enemies = {new Enemy("Mob-Kun")
     };
-    
+
     public OptionsRepository repo = new OptionsRepository();
     public Options ActiveOptions;
 
@@ -117,6 +119,10 @@ class GamePanel extends JPanel implements KeyListener {
                     if (!IsColliding(player.x, nextY, enemy.x, enemy.y)
                             && (Map[Y][StartX] == 0 && Map[Y][EndX] == 0)) {
                         player.y -= player.speed;
+                    } else if (IsColliding(player.x, nextY, enemy.x, enemy.y)) {
+                        EnemyEncountered = true;
+                        ActiveOptions = repo.FightMenuOptions;
+                        TargetEnemy = enemy;
                     }
                 }
             } else if (Map[Y][StartX] == 0 && Map[Y][EndX] == 0) {
@@ -135,6 +141,10 @@ class GamePanel extends JPanel implements KeyListener {
                     if (!IsColliding(player.x, nextY, enemy.x, enemy.y)
                             && (Map[Y][StartX] == 0 && Map[Y][EndX] == 0)) {
                         player.y += player.speed;
+                    } else if (IsColliding(player.x, nextY, enemy.x, enemy.y)) {
+                        EnemyEncountered = true;
+                        ActiveOptions = repo.FightMenuOptions;
+                        TargetEnemy = enemy;
                     }
                 }
             } else if (Map[Y][StartX] == 0 && Map[Y][EndX] == 0) {
@@ -153,6 +163,10 @@ class GamePanel extends JPanel implements KeyListener {
                     if (!IsColliding(nextX, player.y, enemy.x, enemy.y)
                             && (Map[StartY][X] == 0 && Map[EndY][X] == 0)) {
                         player.x -= player.speed;
+                    } else if (IsColliding(nextX, player.y, enemy.x, enemy.y)) {
+                        EnemyEncountered = true;
+                        ActiveOptions = repo.FightMenuOptions;
+                        TargetEnemy = enemy;
                     }
                 }
             } else if (Map[StartY][X] == 0 && Map[EndY][X] == 0) {
@@ -171,6 +185,10 @@ class GamePanel extends JPanel implements KeyListener {
                     if (!IsColliding(nextX, player.y, enemy.x, enemy.y)
                             && (Map[StartY][X] == 0 && Map[EndY][X] == 0)) {
                         player.x += player.speed;
+                    } else if (IsColliding(nextX, player.y, enemy.x, enemy.y)) {
+                        EnemyEncountered = true;
+                        ActiveOptions = repo.FightMenuOptions;
+                        TargetEnemy = enemy;
                     }
                 }
             } else if (Map[StartY][X] == 0 && Map[EndY][X] == 0) {
@@ -234,6 +252,11 @@ class GamePanel extends JPanel implements KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
+        Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
+        Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
+        Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
+        
         DrawMap(g);
         DrawPlayer(g);
         if (enemies.length > 0) {
@@ -247,10 +270,6 @@ class GamePanel extends JPanel implements KeyListener {
             g.setColor(semiTransparentGray);
             g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
 
-            Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
-            Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
-            Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
-            Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
             int Line = 100;
             String PauseText = "PAUSE";//Monospace characters all have the same width so all text should be capitalized
             g.setFont(HeaderFont);
@@ -259,7 +278,30 @@ class GamePanel extends JPanel implements KeyListener {
             g.setFont(BasicFont);
             //pause header
             //options
-            for (String option : repo.PauseMenuOptions.optionsList) {
+            for (String option : ActiveOptions.optionsList) {
+                g.setFont(OptionFont);
+                g.setColor(Color.BLACK);
+                if (option == ActiveOptions.optionsList[ActiveOptions.i]) {
+                    g.setFont(SelectedOptionFont);
+                    g.setColor(Color.WHITE);
+                }
+                Line += g.getFontMetrics().getHeight();
+                g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
+            }
+        }
+        if (EnemyEncountered) {
+            //overlay
+            Color semiTransparentRed = new Color(128, 0, 0, 128);
+            g.setColor(semiTransparentRed);
+            g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
+            g.setFont(HeaderFont);
+            g.drawString("Fight Screen...", GetCenterXCoord(g.getFontMetrics(), "Fight Screen..."), GetCenterYCoord(g.getFontMetrics()));
+            
+            int Line = 100;
+            g.setFont(BasicFont);
+            //pause header
+            //options
+            for (String option : ActiveOptions.optionsList) {
                 g.setFont(OptionFont);
                 g.setColor(Color.BLACK);
                 if (option == ActiveOptions.optionsList[ActiveOptions.i]) {
@@ -278,6 +320,12 @@ class GamePanel extends JPanel implements KeyListener {
         int TextWidth = charWidth * text.length();
         int XCoord = (ScreenWidth / 2) - (TextWidth / 2);
         return XCoord;
+    }
+
+    public int GetCenterYCoord(FontMetrics metrics) {
+        int charHeight = metrics.getHeight();
+        int YCoord = (ScreenHeight / 2) - (charHeight / 2);
+        return YCoord;
     }
 
     @Override

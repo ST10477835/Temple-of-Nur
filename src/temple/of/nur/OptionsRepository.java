@@ -25,11 +25,33 @@ public class OptionsRepository {
         }
         public void Resume(){
             GamePanel.GamePaused = false;
+            
         }
         public void CheckInventory(){}
         public void ExitGame(){
             System.exit(0);
         }
          
+    };
+    Options FightMenuOptions = new Options(new String[]{
+        "Attack",
+        "Use Item",
+        "Block",
+        "Escape",
+        "Filler"
+    },0){
+        @Override
+        public void OptionHandler(){
+            switch(this.i){
+                case 0 -> Attack();
+                case 1 -> UseItem();
+                case 2 -> Block();
+                case 3 -> Escape();
+            }
+        }
+        public void Attack(){}
+        public void UseItem(){}
+        public void Block(){}
+        public void Escape(){}
     };
 }

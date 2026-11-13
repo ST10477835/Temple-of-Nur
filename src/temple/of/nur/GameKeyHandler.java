@@ -11,17 +11,19 @@ import java.awt.event.KeyListener;
  *
  * @author Abulele
  */
-public class GameKeyHandler implements KeyListener{
+public class GameKeyHandler implements KeyListener {
+
     public OptionsRepository repo = new OptionsRepository();
     public GamePanel gamePanel;
-    
-    public GameKeyHandler(KeyListener target, GamePanel gamePanel){
+
+    public GameKeyHandler(KeyListener target, GamePanel gamePanel) {
         this.gamePanel = gamePanel;
-        
+
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+    }
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -29,28 +31,52 @@ public class GameKeyHandler implements KeyListener{
             case KeyEvent.VK_W, KeyEvent.VK_UP -> {
                 if (gamePanel.ActiveOptions != null) {
                     gamePanel.ActiveOptions.i = (gamePanel.ActiveOptions.i <= 0) ? 0 : gamePanel.ActiveOptions.i - 1;//scrolling through a list of options
+                } else if (GamePanel.EnemyEncountered) {
+                    gamePanel.ActiveOptions = repo.FightMenuOptions;
                 } else {
                     gamePanel.UpPressed = true;
                 }
             }
-            case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
-                gamePanel.LeftPressed = true;
+            case KeyEvent.VK_A, KeyEvent.VK_LEFT -> {
+                if (GamePanel.EnemyEncountered) {
+                    gamePanel.ActiveOptions = repo.FightMenuOptions;
+                } else {
+                    gamePanel.LeftPressed = true;
+                }
+            }
             case KeyEvent.VK_S, KeyEvent.VK_DOWN -> {
                 if (gamePanel.ActiveOptions != null) {
                     gamePanel.ActiveOptions.i = (gamePanel.ActiveOptions.i >= gamePanel.ActiveOptions.optionsList.length - 1) ? gamePanel.ActiveOptions.i : gamePanel.ActiveOptions.i + 1;
+                } else if (GamePanel.EnemyEncountered) {
+                    gamePanel.ActiveOptions = repo.FightMenuOptions;
                 } else {
                     gamePanel.DownPressed = true;
                 }
             }
-            case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
-                gamePanel.RightPressed = true;
+            case KeyEvent.VK_D, KeyEvent.VK_RIGHT -> {
+                if (GamePanel.EnemyEncountered) {
+                    gamePanel.ActiveOptions = repo.FightMenuOptions;
+                } else {
+                    gamePanel.RightPressed = true;
+                }
+            }
             case KeyEvent.VK_ESCAPE -> {
                 GamePanel.GamePaused = !GamePanel.GamePaused;
                 System.out.println("Game " + (GamePanel.GamePaused ? "Paused" : "Unpaused"));
                 gamePanel.ActiveOptions = GamePanel.GamePaused ? repo.PauseMenuOptions : null;
             }
             case KeyEvent.VK_SPACE -> {
-                if(GamePanel.GamePaused)gamePanel.ActiveOptions.OptionHandler();
+                if (GamePanel.GamePaused) {
+                    gamePanel.ActiveOptions.OptionHandler();
+                    System.out.println("GamePaused: "+GamePanel.GamePaused);
+                    if(GamePanel.GamePaused == false){ gamePanel.ActiveOptions = null;}
+                }
+                if (GamePanel.EnemyEncountered) {
+                    System.out.println("This code ran");
+                    GamePanel.EnemyEncountered = false;
+                    gamePanel.ActiveOptions = GamePanel.EnemyEncountered? repo.FightMenuOptions : null;
+                    GamePanel.TargetEnemy = null;
+                }
             }
         }
         System.out.println("Options: ");
