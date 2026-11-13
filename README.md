@@ -119,7 +119,7 @@ MISS
 	 - ~~Map Creation~~
 	 - Floors
 	 - Inventory Checking
-	 - Pause Menu
+	 - ~~Pause Menu~~
 	 - Fight Encounters
 	 - Environment interactions
 	 - Tileset Creation (Dungeon)
