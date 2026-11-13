@@ -27,50 +27,14 @@ class GamePanel extends JPanel implements KeyListener {
     public boolean LeftPressed;
     public boolean RightPressed;
 
-    public volatile boolean GamePaused = false;
+    public volatile static boolean GamePaused = false;
 
     Player player = new Player("True Adam", "password123", Denomination.Mage);
     Enemy[] enemies = {new Enemy("Mob-Kun")
     };
     
-    Options ActiveOptions;
-    Options PauseMenuOptions = new Options(new String[]{
-        "Resume",
-        "Check Inventory",
-        "Exit Game"
-    }, 0){
-        @Override
-        public void OptionHandler(){
-            switch(this.i){
-                case 0 -> Resume();
-                case 1 -> CheckInventory();
-                case 2 -> ExitGame();
-            }
-            System.out.println("Clicked");
-        }
-        public void Resume(){
-            GamePaused = false;
-        }
-        public void CheckInventory(){}
-        public void ExitGame(){
-            System.exit(0);
-        }
-         
-    };
-
-    public class Options {
-
-        String[] optionsList;
-        int i;
-
-        Options(String[] optionsList, int i) {
-            this.optionsList = optionsList;
-            this.i = i;
-        }
-
-        void OptionHandler() {
-        }
-    }
+    public OptionsRepository repo = new OptionsRepository();
+    public Options ActiveOptions;
 
     int Scale = 50;//50x50 pixels
     int[][] Map = {
@@ -108,7 +72,7 @@ class GamePanel extends JPanel implements KeyListener {
             player.y = 250;
             GameLoop();
         }).start();
-        addKeyListener(this);
+        addKeyListener(new GameKeyHandler(this, this));
         this.setFocusable(true);
         setVisible(true);
         this.setSize(ScreenWidth, ScreenHeight);
@@ -291,7 +255,7 @@ class GamePanel extends JPanel implements KeyListener {
             g.setFont(BasicFont);
             //pause header
             //options
-            for (String option : PauseMenuOptions.optionsList) {
+            for (String option : repo.PauseMenuOptions.optionsList) {
                 g.setFont(OptionFont);
                 g.setColor(Color.BLACK);
                 if (option == ActiveOptions.optionsList[ActiveOptions.i]) {
@@ -318,55 +282,10 @@ class GamePanel extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_W, KeyEvent.VK_UP -> {
-                if (ActiveOptions != null) {
-                    ActiveOptions.i = (ActiveOptions.i <= 0) ? 0 : ActiveOptions.i - 1;//scrolling through a list of options
-                } else {
-                    UpPressed = true;
-                }
-            }
-            case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
-                LeftPressed = true;
-            case KeyEvent.VK_S, KeyEvent.VK_DOWN -> {
-                if (ActiveOptions != null) {
-                    ActiveOptions.i = (ActiveOptions.i >= ActiveOptions.optionsList.length - 1) ? ActiveOptions.i : ActiveOptions.i + 1;
-                } else {
-                    DownPressed = true;
-                }
-            }
-            case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
-                RightPressed = true;
-            case KeyEvent.VK_ESCAPE -> {
-                GamePaused = !GamePaused;
-                System.out.println("Game " + (GamePaused ? "Paused" : "Unpaused"));
-                ActiveOptions = GamePaused ? PauseMenuOptions : null;
-            }
-            case KeyEvent.VK_SPACE -> {
-                if(GamePaused)ActiveOptions.OptionHandler();
-            }
-        }
-        System.out.println("Options: ");
-        if (ActiveOptions != null) {
-            for (String option : ActiveOptions.optionsList) {
-                System.out.println(option);
-            }
-            System.out.println("Current Index: " + ActiveOptions.i);
-        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_W, KeyEvent.VK_UP ->
-                UpPressed = false;
-            case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
-                LeftPressed = false;
-            case KeyEvent.VK_S, KeyEvent.VK_DOWN ->
-                DownPressed = false;
-            case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
-                RightPressed = false;
-        }
     }
 
 }
