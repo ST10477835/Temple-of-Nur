@@ -18,6 +18,7 @@ import javax.swing.JPanel;
  * @author Abulele
  */
 class GamePanel extends JPanel implements KeyListener {
+
     public int ScreenWidth = 800;
     public int ScreenHeight = 600;
 
@@ -32,11 +33,45 @@ class GamePanel extends JPanel implements KeyListener {
     Enemy[] enemies = {new Enemy("Mob-Kun")
     };
     
-    String[] PauseMenuOptions = {
+    Options ActiveOptions;
+    Options PauseMenuOptions = new Options(new String[]{
         "Resume",
         "Check Inventory",
         "Exit Game"
+    }, 0){
+        @Override
+        public void OptionHandler(){
+            switch(this.i){
+                case 0 -> Resume();
+                case 1 -> CheckInventory();
+                case 2 -> ExitGame();
+            }
+            System.out.println("Clicked");
+        }
+        public void Resume(){
+            GamePaused = false;
+        }
+        public void CheckInventory(){}
+        public void ExitGame(){
+            System.exit(0);
+        }
+         
     };
+
+    public class Options {
+
+        String[] optionsList;
+        int i;
+
+        Options(String[] optionsList, int i) {
+            this.optionsList = optionsList;
+            this.i = i;
+        }
+
+        void OptionHandler() {
+        }
+    }
+
     int Scale = 50;//50x50 pixels
     int[][] Map = {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -230,22 +265,23 @@ class GamePanel extends JPanel implements KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
+
         DrawMap(g);
         DrawPlayer(g);
-        if (enemies.length > 0) { 
+        if (enemies.length > 0) {
             for (Enemy enemy : enemies) {
                 DrawEnemy(enemy, g);
             }
         }
-        if(GamePaused){
+        if (GamePaused) {
             //overlay
             Color semiTransparentGray = new Color(128, 128, 128, 128);
             g.setColor(semiTransparentGray);
             g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
-            
+
             Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
             Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
+            Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
             Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
             int Line = 100;
             String PauseText = "PAUSE";//Monospace characters all have the same width so all text should be capitalized
@@ -255,20 +291,27 @@ class GamePanel extends JPanel implements KeyListener {
             g.setFont(BasicFont);
             //pause header
             //options
-            g.setFont(OptionFont);
-            for(String option: PauseMenuOptions){
-                Line+=g.getFontMetrics().getHeight();
+            for (String option : PauseMenuOptions.optionsList) {
+                g.setFont(OptionFont);
+                g.setColor(Color.BLACK);
+                if (option == ActiveOptions.optionsList[ActiveOptions.i]) {
+                    g.setFont(SelectedOptionFont);
+                    g.setColor(Color.WHITE);
+                }
+                Line += g.getFontMetrics().getHeight();
                 g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
             }
         }
         g.dispose();
     }
-    public int GetCenterXCoord(FontMetrics metrics, String text){
+
+    public int GetCenterXCoord(FontMetrics metrics, String text) {
         int charWidth = metrics.charWidth('M');
         int TextWidth = charWidth * text.length();
-        int XCoord = (ScreenWidth/2)-(TextWidth/2);
+        int XCoord = (ScreenWidth / 2) - (TextWidth / 2);
         return XCoord;
     }
+
     @Override
     public void keyTyped(KeyEvent e) {
     }
@@ -276,18 +319,39 @@ class GamePanel extends JPanel implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_W, KeyEvent.VK_UP ->
-                UpPressed = true;
+            case KeyEvent.VK_W, KeyEvent.VK_UP -> {
+                if (ActiveOptions != null) {
+                    ActiveOptions.i = (ActiveOptions.i <= 0) ? 0 : ActiveOptions.i - 1;//scrolling through a list of options
+                } else {
+                    UpPressed = true;
+                }
+            }
             case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
                 LeftPressed = true;
-            case KeyEvent.VK_S, KeyEvent.VK_DOWN ->
-                DownPressed = true;
+            case KeyEvent.VK_S, KeyEvent.VK_DOWN -> {
+                if (ActiveOptions != null) {
+                    ActiveOptions.i = (ActiveOptions.i >= ActiveOptions.optionsList.length - 1) ? ActiveOptions.i : ActiveOptions.i + 1;
+                } else {
+                    DownPressed = true;
+                }
+            }
             case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
                 RightPressed = true;
             case KeyEvent.VK_ESCAPE -> {
                 GamePaused = !GamePaused;
                 System.out.println("Game " + (GamePaused ? "Paused" : "Unpaused"));
+                ActiveOptions = GamePaused ? PauseMenuOptions : null;
             }
+            case KeyEvent.VK_SPACE -> {
+                if(GamePaused)ActiveOptions.OptionHandler();
+            }
+        }
+        System.out.println("Options: ");
+        if (ActiveOptions != null) {
+            for (String option : ActiveOptions.optionsList) {
+                System.out.println(option);
+            }
+            System.out.println("Current Index: " + ActiveOptions.i);
         }
     }
 
