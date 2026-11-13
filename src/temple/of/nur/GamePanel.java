@@ -5,7 +5,10 @@
 package temple.of.nur;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JPanel;
@@ -16,15 +19,23 @@ import javax.swing.JPanel;
  */
 class GamePanel extends JPanel implements KeyListener {
 
+    public int ScreenWidth = 800;
+    public int ScreenHeight = 600;
+
     public boolean UpPressed;
     public boolean DownPressed;
     public boolean LeftPressed;
     public boolean RightPressed;
 
-    Player player = new Player("True Adam", "password123", Denomination.Mage);
+    public volatile static boolean GamePaused = false;
 
+    Player player = new Player("True Adam", "password123", Denomination.Mage);
     Enemy[] enemies = {new Enemy("Mob-Kun")
     };
+    
+    public OptionsRepository repo = new OptionsRepository();
+    public Options ActiveOptions;
+
     int Scale = 50;//50x50 pixels
     int[][] Map = {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -53,25 +64,29 @@ class GamePanel extends JPanel implements KeyListener {
     };
 
     public GamePanel() {
+        System.out.println("Screen Width: " + ScreenWidth);
+        System.out.println("Screen  Height: " + ScreenHeight);
         new Thread(() -> {
             player.DisplayEntityInformation();
             player.x = 350;
             player.y = 250;
             GameLoop();
         }).start();
-        addKeyListener(this);
+        addKeyListener(new GameKeyHandler(this, this));
         this.setFocusable(true);
         setVisible(true);
-        this.setSize(800, 600);
+        this.setSize(ScreenWidth, ScreenHeight);
         //System.out.println("Panel Width: " + this.getWidth()
         //+"\nPanel Height: " + this.getHeight());
     }
 
     public void GameLoop() {
         while (true) {
-            //movment
-            HandlePlayerMovment();
-            UpdateCamera();
+            if (!GamePaused) {
+                //movment
+                HandlePlayerMovment();
+                UpdateCamera();
+            }
             //render
             this.repaint();
             try {
@@ -95,8 +110,8 @@ class GamePanel extends JPanel implements KeyListener {
             //how wide the player is
             int StartX = (player.x - 1) / Scale;
             int EndX = ((player.x - 1) + Scale) / Scale;
-            StartX = (player.x - (Map[Y][StartX]==1?0:1)) / Scale;
-            EndX = ((player.x - (Map[Y][StartX]==1?0:1)) + Scale) / Scale;
+            StartX = (player.x - (Map[Y][StartX] == 1 ? 0 : 1)) / Scale;
+            EndX = ((player.x - (Map[Y][StartX] == 1 ? 0 : 1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
                     if (!IsColliding(player.x, nextY, enemy.x, enemy.y)
@@ -113,8 +128,8 @@ class GamePanel extends JPanel implements KeyListener {
             int Y = (int) (nextY + Scale) / Scale;
             int StartX = (player.x - 1) / Scale;
             int EndX = ((player.x - 1) + Scale) / Scale;
-            StartX = (player.x - (Map[Y][StartX]==1?0:1)) / Scale;
-            EndX = ((player.x - (Map[Y][StartX]==1?0:1)) + Scale) / Scale;
+            StartX = (player.x - (Map[Y][StartX] == 1 ? 0 : 1)) / Scale;
+            EndX = ((player.x - (Map[Y][StartX] == 1 ? 0 : 1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
                     if (!IsColliding(player.x, nextY, enemy.x, enemy.y)
@@ -131,8 +146,8 @@ class GamePanel extends JPanel implements KeyListener {
             int X = (int) (nextX) / Scale;
             int StartY = (player.y - 1) / Scale;
             int EndY = ((player.y - 1) + Scale) / Scale;
-            StartY = (player.y - (Map[StartY][X]==1?0:1)) / Scale;
-                EndY = ((player.y - (Map[EndY][X]==1?0:1)) + Scale) / Scale;
+            StartY = (player.y - (Map[StartY][X] == 1 ? 0 : 1)) / Scale;
+            EndY = ((player.y - (Map[EndY][X] == 1 ? 0 : 1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
                     if (!IsColliding(nextX, player.y, enemy.x, enemy.y)
@@ -149,8 +164,8 @@ class GamePanel extends JPanel implements KeyListener {
             int X = (int) (nextX + Scale) / Scale;
             int StartY = (player.y - 1) / Scale;
             int EndY = ((player.y - 1) + Scale) / Scale;
-            StartY = (player.y - (Map[StartY][X]==1?0:1)) / Scale;
-                EndY = ((player.y - (Map[EndY][X]==1?0:1)) + Scale) / Scale;
+            StartY = (player.y - (Map[StartY][X] == 1 ? 0 : 1)) / Scale;
+            EndY = ((player.y - (Map[EndY][X] == 1 ? 0 : 1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
                     if (!IsColliding(nextX, player.y, enemy.x, enemy.y)
@@ -214,6 +229,7 @@ class GamePanel extends JPanel implements KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         DrawMap(g);
         DrawPlayer(g);
         if (enemies.length > 0) {
@@ -221,7 +237,43 @@ class GamePanel extends JPanel implements KeyListener {
                 DrawEnemy(enemy, g);
             }
         }
+        if (GamePaused) {
+            //overlay
+            Color semiTransparentGray = new Color(128, 128, 128, 128);
+            g.setColor(semiTransparentGray);
+            g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
+
+            Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
+            Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
+            Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
+            Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
+            int Line = 100;
+            String PauseText = "PAUSE";//Monospace characters all have the same width so all text should be capitalized
+            g.setFont(HeaderFont);
+            g.setColor(Color.BLACK);
+            g.drawString(PauseText, GetCenterXCoord(g.getFontMetrics(), PauseText), Line);
+            g.setFont(BasicFont);
+            //pause header
+            //options
+            for (String option : repo.PauseMenuOptions.optionsList) {
+                g.setFont(OptionFont);
+                g.setColor(Color.BLACK);
+                if (option == ActiveOptions.optionsList[ActiveOptions.i]) {
+                    g.setFont(SelectedOptionFont);
+                    g.setColor(Color.WHITE);
+                }
+                Line += g.getFontMetrics().getHeight();
+                g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
+            }
+        }
         g.dispose();
+    }
+
+    public int GetCenterXCoord(FontMetrics metrics, String text) {
+        int charWidth = metrics.charWidth('M');
+        int TextWidth = charWidth * text.length();
+        int XCoord = (ScreenWidth / 2) - (TextWidth / 2);
+        return XCoord;
     }
 
     @Override
@@ -230,44 +282,10 @@ class GamePanel extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_W, KeyEvent.VK_UP ->
-                UpPressed = true;
-            case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
-                LeftPressed = true;
-            case KeyEvent.VK_S, KeyEvent.VK_DOWN ->
-                DownPressed = true;
-            case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
-                RightPressed = true;
-            case KeyEvent.VK_V -> {
-                int nextX = player.x - player.speed + 1;
-                int X = (int) (nextX) / Scale;
-                int StartY = (player.y - 1) / Scale;
-                int EndY = ((player.y - 1) + Scale) / Scale;
-                StartY = (player.y - (Map[StartY][X]==1?0:1)) / Scale;
-                EndY = ((player.y - (Map[EndY][X]==1?0:1)) + Scale) / Scale;
-                System.out.println("Player coords: {" + player.x + "," + player.y + "}");
-                System.out.println("nextX: " + nextX);
-                System.out.println("X: " + X);
-                System.out.println("StartY: " + StartY);
-                System.out.println("EndY: " + EndY);
-
-            }
-        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_W, KeyEvent.VK_UP ->
-                UpPressed = false;
-            case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
-                LeftPressed = false;
-            case KeyEvent.VK_S, KeyEvent.VK_DOWN ->
-                DownPressed = false;
-            case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
-                RightPressed = false;
-        }
     }
 
 }
