@@ -207,11 +207,15 @@ class GamePanel extends JPanel implements KeyListener {
     }
 
     public void DrawPlayer(Graphics g) {
+        g.setColor(Color.green);
         g.drawRect(player.x - CameraOffSetX, player.y - CameraOffSetY, player.width, player.height);
+        g.setColor(Color.black);
     }
 
     public void DrawEnemy(Enemy enemy, Graphics g) {
+        g.setColor(Color.red);
         g.drawRect(enemy.x - CameraOffSetX, enemy.y - CameraOffSetY, enemy.width, enemy.height);
+        g.setColor(Color.black);
     }
 
     public void DrawMap(Graphics g) {
