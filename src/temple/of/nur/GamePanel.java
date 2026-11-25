@@ -14,13 +14,8 @@ import javax.swing.JPanel;
  *
  * @author Abulele
  */
-class GamePanel extends JPanel implements KeyListener {
-
-    public boolean UpPressed;
-    public boolean DownPressed;
-    public boolean LeftPressed;
-    public boolean RightPressed;
-
+class GamePanel extends JPanel{
+    GameKeyHandler gkh = new GameKeyHandler(this);
     Player player = new Player("True Adam", "password123", Denomination.Mage);
 
     Enemy[] enemies = {new Enemy("Mob-Kun")
@@ -59,7 +54,7 @@ class GamePanel extends JPanel implements KeyListener {
             player.y = 250;
             GameLoop();
         }).start();
-        addKeyListener(this);
+        addKeyListener(gkh);
         this.setFocusable(true);
         setVisible(true);
         this.setSize(800, 600);
@@ -89,7 +84,7 @@ class GamePanel extends JPanel implements KeyListener {
     }
 
     public void HandlePlayerMovment() {
-        if (UpPressed) {
+        if (gkh.UpPressed) {
             int nextY = player.y - player.speed;
             int Y = (int) (nextY) / Scale;
             //how wide the player is
@@ -108,7 +103,7 @@ class GamePanel extends JPanel implements KeyListener {
                 player.y -= player.speed;
             }
         }
-        if (DownPressed) {
+        if (gkh.DownPressed) {
             int nextY = player.y + player.speed - 1;
             int Y = (int) (nextY + Scale) / Scale;
             int StartX = (player.x - 1) / Scale;
@@ -126,7 +121,7 @@ class GamePanel extends JPanel implements KeyListener {
                 player.y += player.speed;
             }
         }
-        if (LeftPressed) {
+        if (gkh.LeftPressed) {
             int nextX = player.x - player.speed + 1;
             int X = (int) (nextX) / Scale;
             int StartY = (player.y - 1) / Scale;
@@ -144,7 +139,7 @@ class GamePanel extends JPanel implements KeyListener {
                 player.x -= player.speed;
             }
         }
-        if (RightPressed) {
+        if (gkh.RightPressed) {
             int nextX = player.x + player.speed - 1;
             int X = (int) (nextX + Scale) / Scale;
             int StartY = (player.y - 1) / Scale;
@@ -223,51 +218,4 @@ class GamePanel extends JPanel implements KeyListener {
         }
         g.dispose();
     }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_W, KeyEvent.VK_UP ->
-                UpPressed = true;
-            case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
-                LeftPressed = true;
-            case KeyEvent.VK_S, KeyEvent.VK_DOWN ->
-                DownPressed = true;
-            case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
-                RightPressed = true;
-            case KeyEvent.VK_V -> {
-                int nextX = player.x - player.speed + 1;
-                int X = (int) (nextX) / Scale;
-                int StartY = (player.y - 1) / Scale;
-                int EndY = ((player.y - 1) + Scale) / Scale;
-                StartY = (player.y - (Map[StartY][X]==1?0:1)) / Scale;
-                EndY = ((player.y - (Map[EndY][X]==1?0:1)) + Scale) / Scale;
-                System.out.println("Player coords: {" + player.x + "," + player.y + "}");
-                System.out.println("nextX: " + nextX);
-                System.out.println("X: " + X);
-                System.out.println("StartY: " + StartY);
-                System.out.println("EndY: " + EndY);
-
-            }
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_W, KeyEvent.VK_UP ->
-                UpPressed = false;
-            case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
-                LeftPressed = false;
-            case KeyEvent.VK_S, KeyEvent.VK_DOWN ->
-                DownPressed = false;
-            case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
-                RightPressed = false;
-        }
-    }
-
 }
