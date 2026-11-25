@@ -9,8 +9,14 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
+import java.awt.RadialGradientPaint;
+import java.awt.Toolkit;
+import java.awt.Transparency;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 
 /**
@@ -227,13 +233,11 @@ class GamePanel extends JPanel implements KeyListener {
     public void DrawPlayer(Graphics g) {
         g.setColor(Color.green);
         g.drawRect(player.x - CameraOffSetX, player.y - CameraOffSetY, player.width, player.height);
-        g.setColor(Color.black);
     }
 
     public void DrawEnemy(Enemy enemy, Graphics g) {
         g.setColor(Color.red);
         g.drawRect(enemy.x - CameraOffSetX, enemy.y - CameraOffSetY, enemy.width, enemy.height);
-        g.setColor(Color.black);
     }
 
     public void DrawMap(Graphics g) {
@@ -248,15 +252,101 @@ class GamePanel extends JPanel implements KeyListener {
         }
     }
 
+    public void DrawPauseMenu(Graphics g) {
+        //overlay
+        Color semiTransparentGray = new Color(128, 128, 128, 128);
+        g.setColor(semiTransparentGray);
+        g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
+
+        int Line = 100;
+        String PauseText = "PAUSE";//Monospace characters all have the same width so all text should be capitalized
+        g.setFont(HeaderFont);
+        g.setColor(Color.BLACK);
+        g.drawString(PauseText, GetCenterXCoord(g.getFontMetrics(), PauseText), Line);
+        g.setFont(BasicFont);
+        //pause header
+        //options
+        for (String option : ActiveOptions.optionsList) {
+            g.setFont(OptionFont);
+            g.setColor(Color.BLACK);
+            if (option == ActiveOptions.optionsList[ActiveOptions.i]) {
+                g.setFont(SelectedOptionFont);
+                g.setColor(Color.WHITE);
+            }
+            Line += g.getFontMetrics().getHeight();
+            g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
+        }
+    }
+
+    public void DrawEnemyEncounterMenu(Graphics g) {
+        //overlay
+        Color semiTransparentRed = new Color(128, 0, 0, 128);
+        g.setColor(semiTransparentRed);
+        g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
+
+        int line = 50;
+        g.setFont(BasicFont);
+        //pause header
+        //options
+        for (String option : ActiveOptions.optionsList) {
+            g.setFont(OptionFont);
+            g.setColor(Color.BLACK);
+            int y = (ScreenHeight-g.getFontMetrics().getHeight()-50);
+            if (option == ActiveOptions.optionsList[ActiveOptions.i]) {
+                g.setFont(SelectedOptionFont);
+                g.setColor(Color.WHITE);
+            }
+            g.drawString(option, line, y);
+            line += (50+(g.getFontMetrics().charWidth('M')*option.length()));
+            
+        }
+    }
+
+    Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
+    Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
+    Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
+    Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
+
+    private BufferedImage vignetteImage;
+
+    private void buildVignette() {
+        vignetteImage = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice()
+                .getDefaultConfiguration()
+                .createCompatibleImage(ScreenWidth, ScreenHeight, Transparency.TRANSLUCENT);
+
+        Graphics2D vg = vignetteImage.createGraphics();
+
+        Point2D center = new Point2D.Float(ScreenWidth / 2f, ScreenHeight / 2f);
+        float radius = Math.max(ScreenWidth, ScreenHeight) * 0.7f;
+
+        float[] dist = {0.0f, 0.65f, 1.0f};
+        Color[] colors = {
+            new Color(0, 0, 0, 0),
+            new Color(0, 0, 0, 40),
+            new Color(0, 0, 0, 200)
+        };
+
+        vg.setPaint(new RadialGradientPaint(center, radius, dist, colors));
+        vg.fillRect(0, 0, ScreenWidth, ScreenHeight);
+        vg.dispose();
+    }
+
+    public void DrawVignette(Graphics2D g) {
+        if (vignetteImage == null
+                || vignetteImage.getWidth() != ScreenWidth
+                || vignetteImage.getHeight() != ScreenHeight) {
+            buildVignette(); // first use, or after a resize
+        }
+        g.drawImage(vignetteImage, 0, 0, null);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
-        Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
-        Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
-        Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
-        
+        //vignette
+        //Graphics2D VignetteG = (Graphics2D) g.create();
         DrawMap(g);
         DrawPlayer(g);
         if (enemies.length > 0) {
@@ -265,54 +355,17 @@ class GamePanel extends JPanel implements KeyListener {
             }
         }
         if (GamePaused) {
-            //overlay
-            Color semiTransparentGray = new Color(128, 128, 128, 128);
-            g.setColor(semiTransparentGray);
-            g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
-
-            int Line = 100;
-            String PauseText = "PAUSE";//Monospace characters all have the same width so all text should be capitalized
-            g.setFont(HeaderFont);
-            g.setColor(Color.BLACK);
-            g.drawString(PauseText, GetCenterXCoord(g.getFontMetrics(), PauseText), Line);
-            g.setFont(BasicFont);
-            //pause header
-            //options
-            for (String option : ActiveOptions.optionsList) {
-                g.setFont(OptionFont);
-                g.setColor(Color.BLACK);
-                if (option == ActiveOptions.optionsList[ActiveOptions.i]) {
-                    g.setFont(SelectedOptionFont);
-                    g.setColor(Color.WHITE);
-                }
-                Line += g.getFontMetrics().getHeight();
-                g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
-            }
+            DrawPauseMenu(g);
         }
         if (EnemyEncountered) {
-            //overlay
-            Color semiTransparentRed = new Color(128, 0, 0, 128);
-            g.setColor(semiTransparentRed);
-            g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
-            g.setFont(HeaderFont);
-            g.drawString("Fight Screen...", GetCenterXCoord(g.getFontMetrics(), "Fight Screen..."), GetCenterYCoord(g.getFontMetrics()));
-            
-            int Line = 100;
-            g.setFont(BasicFont);
-            //pause header
-            //options
-            for (String option : ActiveOptions.optionsList) {
-                g.setFont(OptionFont);
-                g.setColor(Color.BLACK);
-                if (option == ActiveOptions.optionsList[ActiveOptions.i]) {
-                    g.setFont(SelectedOptionFont);
-                    g.setColor(Color.WHITE);
-                }
-                Line += g.getFontMetrics().getHeight();
-                g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
-            }
+            DrawEnemyEncounterMenu(g);
         }
+
+        DrawVignette((Graphics2D) g);
+
+        //VignetteG.dispose();
         g.dispose();
+        Toolkit.getDefaultToolkit().sync();
     }
 
     public int GetCenterXCoord(FontMetrics metrics, String text) {
