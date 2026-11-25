@@ -6,8 +6,12 @@ package temple.of.nur;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.MultipleGradientPaint.CycleMethod;
+import java.awt.RadialGradientPaint;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Point2D;
 import javax.swing.JPanel;
 
 /**
@@ -216,6 +220,14 @@ class GamePanel extends JPanel{
                 DrawEnemy(enemy, g);
             }
         }
+        Graphics2D g2d = (Graphics2D) g;
+        Point2D center = new Point2D.Float(this.getWidth()/2, this.getHeight()/2);
+        float radius = (float) (this.getWidth()/2);
+        float[] distributions = {0.0f, 1.0f};
+        Color[] colors = {new Color(128,128,128,128), new Color(245, 245, 245, 0)};
+        RadialGradientPaint rdp = new RadialGradientPaint(center, radius, center, distributions, colors, CycleMethod.REPEAT);
+        g2d.setPaint(rdp);
+        g.fillRect(0,0, this.getWidth(), this.getHeight());
         g.dispose();
     }
 }
