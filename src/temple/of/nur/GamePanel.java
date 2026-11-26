@@ -5,25 +5,124 @@
 package temple.of.nur;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.RadialGradientPaint;
+import java.awt.Transparency;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JPanel;
 
 /**
  *
  * @author Abulele
  */
-class GamePanel extends JPanel{
-    GameKeyHandler gkh = new GameKeyHandler(this);
-    Player player = new Player("True Adam", "password123", Denomination.Mage);
+public class GamePanel extends JPanel {
 
-    Enemy[] enemies = {new Enemy("Mob-Kun")
+    Player player = new Player("True Adam", "password123", Denomination.Mage);
+    Enemy[] enemies = {new Enemy("Mob-Kun")};
+
+    GameKeyHandler gkh = new GameKeyHandler(this);
+    public int ScreenWidth = 800;
+    public int ScreenHeight = 600;
+
+    public OptionSet InventoryMenu = new OptionSet("", new String[]{""}, 0){
+        @Override
+        public void Draw(Graphics g) {
+            //overlay
+            Color semiTransparentGray = new Color(128, 128, 128, 128);
+            g.setColor(semiTransparentGray);
+            g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
+
+            int Line = 100;
+            String PauseText = "Game Paused";//Monospace characters all have the same width so all text should be capitalized
+            g.setFont(HeaderFont);
+            g.setColor(Color.BLACK);
+            g.drawString(PauseText, GetCenterXCoord(g.getFontMetrics(), PauseText), Line);
+            g.setFont(BasicFont);
+            //pause header
+            //options
+            for (String option : ActiveOptionSet.Options) {
+                g.setFont(OptionFont);
+                g.setColor(Color.BLACK);
+                if (option.equals(ActiveOptionSet.Options[ActiveOptionSet.i])) {
+                    g.setFont(SelectedOptionFont);
+                    g.setColor(Color.WHITE);
+                }
+                Line += g.getFontMetrics().getHeight();
+                g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
+            }
+        }
     };
+    public OptionSet PauseMenu = new OptionSet("Game Paused", new String[]{"Continue", "Check Inventory", "Exit Game"}, 0) {
+        @Override
+        public void OptionHandler() {
+            switch (this.i) {
+                case 0 ->
+                    Continue();
+                case 1 ->
+                    CheckInventory();
+                case 2 ->
+                    ExitGame();
+            }
+        }
+
+        @Override
+        public void Draw(Graphics g) {
+            //overlay
+            Color semiTransparentGray = new Color(128, 128, 128, 128);
+            g.setColor(semiTransparentGray);
+            g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
+
+            int Line = 100;
+            String PauseText = "Game Paused";//Monospace characters all have the same width so all text should be capitalized
+            g.setFont(HeaderFont);
+            g.setColor(Color.BLACK);
+            g.drawString(PauseText, GetCenterXCoord(g.getFontMetrics(), PauseText), Line);
+            g.setFont(BasicFont);
+            //pause header
+            //options
+            for (String option : ActiveOptionSet.Options) {
+                g.setFont(OptionFont);
+                g.setColor(Color.BLACK);
+                if (option.equals(ActiveOptionSet.Options[ActiveOptionSet.i])) {
+                    g.setFont(SelectedOptionFont);
+                    g.setColor(Color.WHITE);
+                }
+                Line += g.getFontMetrics().getHeight();
+                g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
+            }
+        }
+
+        public void Continue() {
+            if (this.LastOptionSet != null) {
+                ActiveOptionSet = this.LastOptionSet;
+            } else {
+                ActiveOptionSet = null;
+                gkh.GamePaused = false;
+            }
+        }
+
+        public void CheckInventory() {
+            ActiveOptionSet = InventoryMenu;
+            ActiveOptionSet.LastOptionSet = PauseMenu;
+        }
+
+        public void ExitGame() {
+            System.exit(0);
+        }
+    };
+
+    public OptionSet ActiveOptionSet;
+
     int Scale = 50;//50x50 pixels
     int[][] Map = {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -61,16 +160,25 @@ class GamePanel extends JPanel{
         addKeyListener(gkh);
         this.setFocusable(true);
         setVisible(true);
-        this.setSize(800, 600);
-        //System.out.println("Panel Width: " + this.getWidth()
-        //+"\nPanel Height: " + this.getHeight());
+        this.setSize(ScreenWidth, ScreenHeight);
+        player.Inventory.ItemList = new Item[]{
+            new Item("Item 1"),
+            new Item("Item 2"),
+            new Item("Item 3")};
+        player.Inventory.WeaponList = new Weapon[]{
+            new Weapon("Weapon 1"),
+            new Weapon("Weapon 2"),
+            new Weapon("Weapon 3")};
+        PopulateInventoryMenu();
     }
 
     public void GameLoop() {
         while (true) {
-            //movment
-            HandlePlayerMovment();
-            UpdateCamera();
+            if (!gkh.GamePaused) {
+                //movment
+                HandlePlayerMovment();
+                UpdateCamera();
+            }
             //render
             this.repaint();
             try {
@@ -81,7 +189,18 @@ class GamePanel extends JPanel{
             }
         }
     }
+    public void PopulateInventoryMenu(){
+        ArrayList<String> Inventory = new ArrayList<>();
+        for(Item item: player.Inventory.ItemList){
+            Inventory.add(item.Name);
+        }
+        for(Weapon weapon: player.Inventory.WeaponList){
+            Inventory.add(weapon.Name);
+        }
+        InventoryMenu.Options = new String[Inventory.size()];
+        InventoryMenu.Options = Inventory.toArray(InventoryMenu.Options);
 
+    }
     //movement
     public boolean IsColliding(int thisX, int thisY, int thatX, int thatY) {
         return thisX < thatX + Scale && thisX + Scale > thatX && thisY < thatY + Scale && thisY + Scale > thatY;
@@ -94,8 +213,8 @@ class GamePanel extends JPanel{
             //how wide the player is
             int StartX = (player.x - 1) / Scale;
             int EndX = ((player.x - 1) + Scale) / Scale;
-            StartX = (player.x - (Map[Y][StartX]==1?0:1)) / Scale;
-            EndX = ((player.x - (Map[Y][StartX]==1?0:1)) + Scale) / Scale;
+            StartX = (player.x - (Map[Y][StartX] == 1 ? 0 : 1)) / Scale;
+            EndX = ((player.x - (Map[Y][StartX] == 1 ? 0 : 1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
                     if (!IsColliding(player.x, nextY, enemy.x, enemy.y)
@@ -112,8 +231,8 @@ class GamePanel extends JPanel{
             int Y = (int) (nextY + Scale) / Scale;
             int StartX = (player.x - 1) / Scale;
             int EndX = ((player.x - 1) + Scale) / Scale;
-            StartX = (player.x - (Map[Y][StartX]==1?0:1)) / Scale;
-            EndX = ((player.x - (Map[Y][StartX]==1?0:1)) + Scale) / Scale;
+            StartX = (player.x - (Map[Y][StartX] == 1 ? 0 : 1)) / Scale;
+            EndX = ((player.x - (Map[Y][StartX] == 1 ? 0 : 1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
                     if (!IsColliding(player.x, nextY, enemy.x, enemy.y)
@@ -130,8 +249,8 @@ class GamePanel extends JPanel{
             int X = (int) (nextX) / Scale;
             int StartY = (player.y - 1) / Scale;
             int EndY = ((player.y - 1) + Scale) / Scale;
-            StartY = (player.y - (Map[StartY][X]==1?0:1)) / Scale;
-                EndY = ((player.y - (Map[EndY][X]==1?0:1)) + Scale) / Scale;
+            StartY = (player.y - (Map[StartY][X] == 1 ? 0 : 1)) / Scale;
+            EndY = ((player.y - (Map[EndY][X] == 1 ? 0 : 1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
                     if (!IsColliding(nextX, player.y, enemy.x, enemy.y)
@@ -148,8 +267,8 @@ class GamePanel extends JPanel{
             int X = (int) (nextX + Scale) / Scale;
             int StartY = (player.y - 1) / Scale;
             int EndY = ((player.y - 1) + Scale) / Scale;
-            StartY = (player.y - (Map[StartY][X]==1?0:1)) / Scale;
-                EndY = ((player.y - (Map[EndY][X]==1?0:1)) + Scale) / Scale;
+            StartY = (player.y - (Map[StartY][X] == 1 ? 0 : 1)) / Scale;
+            EndY = ((player.y - (Map[EndY][X] == 1 ? 0 : 1)) + Scale) / Scale;
             if (enemies.length > 0) {
                 for (Enemy enemy : enemies) {
                     if (!IsColliding(nextX, player.y, enemy.x, enemy.y)
@@ -162,6 +281,7 @@ class GamePanel extends JPanel{
             }
         }
     }
+
     //rendering
     //entity scale are the only things that are subject to variable change
     //everything else will follow Scale
@@ -190,6 +310,11 @@ class GamePanel extends JPanel{
 
     }
 
+    Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
+    Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
+    Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
+    Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
+
     public void DrawPlayer(Graphics g) {
         g.drawRect(player.x - CameraOffSetX, player.y - CameraOffSetY, player.width, player.height);
     }
@@ -210,6 +335,39 @@ class GamePanel extends JPanel{
         }
     }
 
+    public void DrawVignette(Graphics2D g) {
+        if (vignetteImage == null
+                || vignetteImage.getWidth() != ScreenWidth
+                || vignetteImage.getHeight() != ScreenHeight) {
+            buildVignette(); // first use, or after a resize
+        }
+        g.drawImage(vignetteImage, 0, 0, null);
+    }
+
+    private BufferedImage vignetteImage;
+
+    public void buildVignette() {
+        vignetteImage = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice()
+                .getDefaultConfiguration()
+                .createCompatibleImage(ScreenWidth, ScreenHeight, Transparency.TRANSLUCENT);
+
+        Graphics2D vg = vignetteImage.createGraphics();
+
+        Point2D center = new Point2D.Float(ScreenWidth / 2f, ScreenHeight / 2f);
+        float radius = Math.max(ScreenWidth, ScreenHeight) * 0.7f;
+
+        float[] dist = {0.0f, 0.65f, 1.0f};
+        Color[] colors = {
+            new Color(0, 0, 0, 0),
+            new Color(0, 0, 0, 40),
+            new Color(0, 0, 0, 200)
+        };
+        vg.setPaint(new RadialGradientPaint(center, radius, dist, colors));
+        vg.fillRect(0, 0, ScreenWidth, ScreenHeight);
+        vg.dispose();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -220,14 +378,23 @@ class GamePanel extends JPanel{
                 DrawEnemy(enemy, g);
             }
         }
-        Graphics2D g2d = (Graphics2D) g;
-        Point2D center = new Point2D.Float(this.getWidth()/2, this.getHeight()/2);
-        float radius = (float) (this.getWidth()/2);
-        float[] distributions = {0.0f, 1.0f};
-        Color[] colors = {new Color(128,128,128,128), new Color(245, 245, 245, 0)};
-        RadialGradientPaint rdp = new RadialGradientPaint(center, radius, center, distributions, colors, CycleMethod.REPEAT);
-        g2d.setPaint(rdp);
-        g.fillRect(0,0, this.getWidth(), this.getHeight());
+        if (ActiveOptionSet!=null) {
+            ActiveOptionSet.Draw(g);
+        }
+        DrawVignette((Graphics2D) g);
         g.dispose();
+    }
+
+    public int GetCenterXCoord(FontMetrics metrics, String text) {
+        int charWidth = metrics.charWidth('M');
+        int TextWidth = charWidth * text.length();
+        int XCoord = (ScreenWidth / 2) - (TextWidth / 2);
+        return XCoord;
+    }
+
+    public int GetCenterYCoord(FontMetrics metrics) {
+        int charHeight = metrics.getHeight();
+        int YCoord = (ScreenHeight / 2) - (charHeight / 2);
+        return YCoord;
     }
 }

@@ -13,5 +13,9 @@ class Item {
     public String Name;
     public temple.of.nur.Status Status; //effect
     public int Price;
+    public Item(){}
+    public Item(String Name){
+        this.Name = Name;
+    }
     
 }

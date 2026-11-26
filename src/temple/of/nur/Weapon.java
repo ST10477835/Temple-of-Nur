@@ -15,5 +15,9 @@ class Weapon {
     public int Price;
     public int Attack;
     public Skill[] WeaponList;
+    public Weapon(){}
+    public Weapon(String Name){
+        this.Name = Name;
+    }
     
 }

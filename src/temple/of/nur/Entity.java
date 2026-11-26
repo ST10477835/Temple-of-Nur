@@ -24,7 +24,7 @@ public abstract class Entity {
     public Statistic Intelligence = new Statistic("Intelligence", 8);
     public Statistic Defense = new Statistic("Defense", 8);
     public Statistic Luck = new Statistic("Luck", 8);
-    public Inventory Inventory;
+    public Inventory Inventory = new Inventory();
     public Status[] StatusSlots;
 
     public Entity(String Name, int x, int y, int width, int height) {

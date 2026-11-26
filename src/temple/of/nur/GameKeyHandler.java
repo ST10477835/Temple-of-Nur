@@ -12,29 +12,61 @@ import javax.swing.JPanel;
  *
  * @author Abulele
  */
-public class GameKeyHandler implements KeyListener{
+public class GameKeyHandler implements KeyListener {
+
+    public GamePanel GamePanel;
+
     public boolean UpPressed;
     public boolean DownPressed;
     public boolean LeftPressed;
     public boolean RightPressed;
-    
-    public GameKeyHandler(JPanel GamePanel){
+
+    public boolean GamePaused = false;
+
+    public GameKeyHandler(GamePanel GamePanel) {
+        this.GamePanel = GamePanel;
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+    }
 
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_W, KeyEvent.VK_UP ->
+            case KeyEvent.VK_W, KeyEvent.VK_UP -> {
+                if (GamePaused && (GamePanel.ActiveOptionSet.i > 0)) {
+                    GamePanel.ActiveOptionSet.i--;
+                }
                 UpPressed = true;
+            }
             case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
                 LeftPressed = true;
-            case KeyEvent.VK_S, KeyEvent.VK_DOWN ->
+            case KeyEvent.VK_S, KeyEvent.VK_DOWN -> {
+                if (GamePaused && (GamePanel.ActiveOptionSet.i < GamePanel.ActiveOptionSet.Options.length)) {
+                    GamePanel.ActiveOptionSet.i++;
+                }
                 DownPressed = true;
+            }
             case KeyEvent.VK_D, KeyEvent.VK_RIGHT ->
                 RightPressed = true;
+            case KeyEvent.VK_ESCAPE -> {
+                if (GamePanel.ActiveOptionSet == null) {
+                    GamePaused = true;
+                    GamePanel.ActiveOptionSet = GamePanel.PauseMenu;
+                } else {
+                    if (GamePanel.ActiveOptionSet == GamePanel.PauseMenu) {
+                        GamePaused = false;
+                    }
+                    if (GamePanel.ActiveOptionSet.LastOptionSet != null) {
+                        GamePanel.ActiveOptionSet = GamePanel.ActiveOptionSet.LastOptionSet;
+                    } else {
+                        GamePanel.ActiveOptionSet = null;
+                    }
+                }
+            }
+            case KeyEvent.VK_SPACE ->
+                GamePanel.ActiveOptionSet.OptionHandler();
         }
     }
 
@@ -52,5 +84,4 @@ public class GameKeyHandler implements KeyListener{
         }
     }
 
-    
 }

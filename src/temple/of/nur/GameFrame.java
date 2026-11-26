@@ -13,6 +13,8 @@ import javax.swing.JFrame;
  * @author Abulele
  */
 class GameFrame extends JFrame {
+    public static int FrameWidth;
+    public static int FrameHeight;
     
     public GameFrame() {
         this.setResizable(true);
@@ -21,9 +23,9 @@ class GameFrame extends JFrame {
         this.add(GamePanel);
         this.pack();
         Insets Insets = this.getInsets();
-        int CalculatedWidth = 800 + Insets.left + Insets.right;
-        int CalclulatedHeight = 600 + Insets.bottom + Insets.top;
-        this.setSize(CalculatedWidth, CalclulatedHeight);
+        FrameWidth = 800 + Insets.left + Insets.right;
+        FrameHeight = 600 + Insets.bottom + Insets.top;
+        this.setSize(FrameWidth, FrameHeight);
         System.out.println("Frame Width: " + this.getWidth());
         System.out.println("Frame Height: " + this.getHeight());
         this.setBackground(Color.black);
