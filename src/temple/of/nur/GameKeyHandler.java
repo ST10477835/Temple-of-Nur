@@ -53,9 +53,9 @@ public class GameKeyHandler implements KeyListener {
             case KeyEvent.VK_ESCAPE -> {
                 if (GamePanel.ActiveOptionSet == null) {
                     GamePaused = true;
-                    GamePanel.ActiveOptionSet = GamePanel.PauseMenu;
+                    GamePanel.ActiveOptionSet = OptionSets.PauseMenu;
                 } else {
-                    if (GamePanel.ActiveOptionSet == GamePanel.PauseMenu) {
+                    if (GamePanel.ActiveOptionSet == OptionSets.PauseMenu) {
                         GamePaused = false;
                     }
                     if (GamePanel.ActiveOptionSet.LastOptionSet != null) {

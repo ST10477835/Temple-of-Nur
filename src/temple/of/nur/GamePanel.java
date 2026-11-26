@@ -30,96 +30,11 @@ public class GamePanel extends JPanel {
     Player player = new Player("True Adam", "password123", Denomination.Mage);
     Enemy[] enemies = {new Enemy("Mob-Kun")};
 
+    OptionSets OptionSets = new OptionSets(this);
     GameKeyHandler gkh = new GameKeyHandler(this);
     public int ScreenWidth = 800;
     public int ScreenHeight = 600;
 
-    public OptionSet InventoryMenu = new OptionSet("", new String[]{""}, 0){
-        @Override
-        public void Draw(Graphics g) {
-            //overlay
-            Color semiTransparentGray = new Color(128, 128, 128, 128);
-            g.setColor(semiTransparentGray);
-            g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
-
-            int Line = 100;
-            String PauseText = "Game Paused";//Monospace characters all have the same width so all text should be capitalized
-            g.setFont(HeaderFont);
-            g.setColor(Color.BLACK);
-            g.drawString(PauseText, GetCenterXCoord(g.getFontMetrics(), PauseText), Line);
-            g.setFont(BasicFont);
-            //pause header
-            //options
-            for (String option : ActiveOptionSet.Options) {
-                g.setFont(OptionFont);
-                g.setColor(Color.BLACK);
-                if (option.equals(ActiveOptionSet.Options[ActiveOptionSet.i])) {
-                    g.setFont(SelectedOptionFont);
-                    g.setColor(Color.WHITE);
-                }
-                Line += g.getFontMetrics().getHeight();
-                g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
-            }
-        }
-    };
-    public OptionSet PauseMenu = new OptionSet("Game Paused", new String[]{"Continue", "Check Inventory", "Exit Game"}, 0) {
-        @Override
-        public void OptionHandler() {
-            switch (this.i) {
-                case 0 ->
-                    Continue();
-                case 1 ->
-                    CheckInventory();
-                case 2 ->
-                    ExitGame();
-            }
-        }
-
-        @Override
-        public void Draw(Graphics g) {
-            //overlay
-            Color semiTransparentGray = new Color(128, 128, 128, 128);
-            g.setColor(semiTransparentGray);
-            g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
-
-            int Line = 100;
-            String PauseText = "Game Paused";//Monospace characters all have the same width so all text should be capitalized
-            g.setFont(HeaderFont);
-            g.setColor(Color.BLACK);
-            g.drawString(PauseText, GetCenterXCoord(g.getFontMetrics(), PauseText), Line);
-            g.setFont(BasicFont);
-            //pause header
-            //options
-            for (String option : ActiveOptionSet.Options) {
-                g.setFont(OptionFont);
-                g.setColor(Color.BLACK);
-                if (option.equals(ActiveOptionSet.Options[ActiveOptionSet.i])) {
-                    g.setFont(SelectedOptionFont);
-                    g.setColor(Color.WHITE);
-                }
-                Line += g.getFontMetrics().getHeight();
-                g.drawString(option, GetCenterXCoord(g.getFontMetrics(), option), Line);
-            }
-        }
-
-        public void Continue() {
-            if (this.LastOptionSet != null) {
-                ActiveOptionSet = this.LastOptionSet;
-            } else {
-                ActiveOptionSet = null;
-                gkh.GamePaused = false;
-            }
-        }
-
-        public void CheckInventory() {
-            ActiveOptionSet = InventoryMenu;
-            ActiveOptionSet.LastOptionSet = PauseMenu;
-        }
-
-        public void ExitGame() {
-            System.exit(0);
-        }
-    };
 
     public OptionSet ActiveOptionSet;
 
@@ -197,8 +112,8 @@ public class GamePanel extends JPanel {
         for(Weapon weapon: player.Inventory.WeaponList){
             Inventory.add(weapon.Name);
         }
-        InventoryMenu.Options = new String[Inventory.size()];
-        InventoryMenu.Options = Inventory.toArray(InventoryMenu.Options);
+        OptionSets.InventoryMenu.Options = new String[Inventory.size()];
+        OptionSets.InventoryMenu.Options = Inventory.toArray(OptionSets.InventoryMenu.Options);
 
     }
     //movement
@@ -310,10 +225,10 @@ public class GamePanel extends JPanel {
 
     }
 
-    Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
-    Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
-    Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
-    Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
+    public static Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
+    public static Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
+    public static Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
+    public static Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
 
     public void DrawPlayer(Graphics g) {
         g.drawRect(player.x - CameraOffSetX, player.y - CameraOffSetY, player.width, player.height);
