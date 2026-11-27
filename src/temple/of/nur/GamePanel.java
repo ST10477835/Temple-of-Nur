@@ -30,6 +30,7 @@ public class GamePanel extends JPanel {
     Player player = new Player("True Adam", "password123", Denomination.Mage);
     Enemy[] enemies = {new Enemy("Mob-Kun")};
 
+    public static Inventory inventory = new Inventory();
     OptionSets OptionSets = new OptionSets(this);
     GameKeyHandler gkh = new GameKeyHandler(this);
     public int ScreenWidth = 800;
@@ -85,6 +86,8 @@ public class GamePanel extends JPanel {
             new Weapon("Weapon 2"),
             new Weapon("Weapon 3")};
         PopulateInventoryMenu();
+        inventory.ItemList = player.Inventory.ItemList;
+        inventory.WeaponList = player.Inventory.WeaponList;
     }
 
     public void GameLoop() {
@@ -226,7 +229,7 @@ public class GamePanel extends JPanel {
     }
 
     public static Font HeaderFont = new Font(Font.MONOSPACED, Font.BOLD, 50);
-    public static Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 13);
+    public static Font OptionFont = new Font(Font.MONOSPACED, Font.BOLD, 25);
     public static Font SelectedOptionFont = new Font(Font.MONOSPACED, Font.BOLD, 30);
     public static Font BasicFont = new Font(Font.MONOSPACED, Font.PLAIN, 13);
 
@@ -312,4 +315,8 @@ public class GamePanel extends JPanel {
         int YCoord = (ScreenHeight / 2) - (charHeight / 2);
         return YCoord;
     }
+    public static void drawString(Graphics g, String text, int x, int y) {
+                for (String line : text.split("\n"))
+                    g.drawString(line, x, y += g.getFontMetrics().getHeight());
+            }
 }

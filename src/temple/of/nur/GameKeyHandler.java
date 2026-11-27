@@ -43,7 +43,7 @@ public class GameKeyHandler implements KeyListener {
             case KeyEvent.VK_A, KeyEvent.VK_LEFT ->
                 LeftPressed = true;
             case KeyEvent.VK_S, KeyEvent.VK_DOWN -> {
-                if (GamePaused && (GamePanel.ActiveOptionSet.i < GamePanel.ActiveOptionSet.Options.length)) {
+                if (GamePaused && (GamePanel.ActiveOptionSet.i < GamePanel.ActiveOptionSet.Options.length-1)) {
                     GamePanel.ActiveOptionSet.i++;
                 }
                 DownPressed = true;

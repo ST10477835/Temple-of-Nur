@@ -8,7 +8,7 @@ package temple.of.nur;
  *
  * @author Abulele
  */
-class Inventory {
+public class Inventory {
     
     public Item[] ItemList;
     public Weapon[] WeaponList;

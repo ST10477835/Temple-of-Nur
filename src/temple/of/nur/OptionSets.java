@@ -25,24 +25,36 @@ public class OptionSets {
             g.setColor(semiTransparentGray);
             g.fillRect(0, 0, GameFrame.FrameWidth, GameFrame.FrameHeight);
 
-            int Line = 100;
-            String PauseText = "Game Paused";//Monospace characters all have the same width so all text should be capitalized
-            g.setFont(GamePanel.HeaderFont);
             g.setColor(Color.BLACK);
-            g.drawString(PauseText, GamePanel.GetCenterXCoord(g.getFontMetrics(), PauseText), Line);
-            g.setFont(GamePanel.BasicFont);
-            //pause header
-            //options
-            for (String option : GamePanel.ActiveOptionSet.Options) {
-                g.setFont(GamePanel.OptionFont);
-                g.setColor(Color.BLACK);
-                if (option.equals(GamePanel.ActiveOptionSet.Options[GamePanel.ActiveOptionSet.i])) {
-                    g.setFont(GamePanel.SelectedOptionFont);
-                    g.setColor(Color.WHITE);
+            g.fillRect(50, 50, GamePanel.ScreenWidth- 100, GamePanel.ScreenHeight - 100);
+            int Y = 80;
+            int X = 80;
+            g.setFont(GamePanel.OptionFont);
+            g.setColor(Color.WHITE);
+            
+            String Name = "";
+            Status Status = new Status();
+            int Price = 0;
+            for(String option: this.Options){
+                if(option.equals(this.Options[i])){
+                    g.drawString("-",65, Y);
+                    try{
+                        Name = GamePanel.inventory.ItemList[i].Name;
+                        Status = GamePanel.inventory.ItemList[i].Status;
+                        Price = GamePanel.inventory.ItemList[i].Price;
+                    }catch(Exception e){
+                        Name = GamePanel.inventory.WeaponList[i-GamePanel.inventory.ItemList.length].Name;
+                        Status  = GamePanel.inventory.WeaponList[i-GamePanel.inventory.ItemList.length].Status;
+                        Price = GamePanel.inventory.WeaponList[i-GamePanel.inventory.ItemList.length].Price;
+                    }
                 }
-                Line += g.getFontMetrics().getHeight();
-                g.drawString(option, GamePanel.GetCenterXCoord(g.getFontMetrics(), option), Line);
+                g.drawString(option, X, Y);
+                Y+=30;
             }
+            String DescriptionText = "Name: "+Name
+                    +"\nStatus: "+Status.Name
+                    +"\nPrice: "+Price;
+            GamePanel.drawString(g,DescriptionText, 400, 50);
         }
     };
     public static OptionSet PauseMenu = new OptionSet("Game Paused", new String[]{"Continue", "Check Inventory", "Exit Game"}, 0) {

@@ -11,8 +11,8 @@ package temple.of.nur;
 class Weapon {
     
     public String Name;
-    public temple.of.nur.Status Status;
-    public int Price;
+    public temple.of.nur.Status Status = new Status();
+    public int Price = 0;
     public int Attack;
     public Skill[] WeaponList;
     public Weapon(){}

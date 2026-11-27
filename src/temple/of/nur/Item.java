@@ -11,8 +11,8 @@ package temple.of.nur;
 class Item {
     
     public String Name;
-    public temple.of.nur.Status Status; //effect
-    public int Price;
+    public temple.of.nur.Status Status = new Status(); //effect
+    public int Price = 0;
     public Item(){}
     public Item(String Name){
         this.Name = Name;
